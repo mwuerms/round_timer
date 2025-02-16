@@ -265,7 +265,10 @@
     "equivalence_files": []
   },
   "erc": {
-    "erc_exclusions": [],
+    "erc_exclusions": [
+      "power_pin_not_driven|1498600|762000|ce5b3d6f-22ca-4f88-b76e-73a3cd6fea1e|00000000-0000-0000-0000-000000000000|/e329df4a-6588-455a-9936-c9675a4aa830|/e329df4a-6588-455a-9936-c9675a4aa830|",
+      "power_pin_not_driven|889000|635000|3b7ece7f-0a92-4965-812b-e3606cce3218|00000000-0000-0000-0000-000000000000|/e329df4a-6588-455a-9936-c9675a4aa830|/e329df4a-6588-455a-9936-c9675a4aa830|"
+    ],
     "meta": {
       "version": 0
     },
@@ -480,7 +483,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "lighthouse_base.kicad_pro",
+    "filename": "rt01a.kicad_pro",
     "version": 1
   },
   "net_settings": {
@@ -627,14 +630,6 @@
     [
       "e329df4a-6588-455a-9936-c9675a4aa830",
       "Root"
-    ],
-    [
-      "ce677066-b0b4-4434-a6aa-4b692f0d9db5",
-      "Lighthouse MCU"
-    ],
-    [
-      "0766630d-8ec2-4c83-94b4-820a1d6c29c4",
-      "Lighthouse Peripherials"
     ]
   ],
   "text_variables": {}
