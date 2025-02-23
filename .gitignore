@@ -87,3 +87,5 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+# Eclipse
+*.metadata/*
