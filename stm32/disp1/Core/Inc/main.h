@@ -53,24 +53,14 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+extern volatile uint32_t global_events;
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define BTN3_Pin GPIO_PIN_13
-#define BTN3_GPIO_Port GPIOC
 #define SOUND_TX_Pin GPIO_PIN_2
 #define SOUND_TX_GPIO_Port GPIOA
 #define SOUND_RX_Pin GPIO_PIN_3
 #define SOUND_RX_GPIO_Port GPIOA
-#define LCD_SCK_Pin GPIO_PIN_5
-#define LCD_SCK_GPIO_Port GPIOA
-#define LCD_MISO_Pin GPIO_PIN_6
-#define LCD_MISO_GPIO_Port GPIOA
-#define ROT_A_Pin GPIO_PIN_0
-#define ROT_A_GPIO_Port GPIOB
-#define ROT_B_Pin GPIO_PIN_1
-#define ROT_B_GPIO_Port GPIOB
 #define DISP_RST_Pin GPIO_PIN_10
 #define DISP_RST_GPIO_Port GPIOB
 #define DISP_DC_Pin GPIO_PIN_11
@@ -85,15 +75,19 @@ void Error_Handler(void);
 #define DISP_MOSI_GPIO_Port GPIOB
 #define BTN2_Pin GPIO_PIN_3
 #define BTN2_GPIO_Port GPIOB
+#define BTN2_EXTI_IRQn EXTI3_IRQn
 #define BTN1_Pin GPIO_PIN_4
 #define BTN1_GPIO_Port GPIOB
-#define ENC_IN1_Pin GPIO_PIN_5
-#define ENC_IN1_GPIO_Port GPIOB
+#define BTN1_EXTI_IRQn EXTI4_IRQn
+#define ENC_A_Pin GPIO_PIN_5
+#define ENC_A_GPIO_Port GPIOB
+#define ENC_A_EXTI_IRQn EXTI9_5_IRQn
 #define BTN0_Pin GPIO_PIN_6
 #define BTN0_GPIO_Port GPIOB
 #define BTN0_EXTI_IRQn EXTI9_5_IRQn
-#define ENC_IN2_Pin GPIO_PIN_7
-#define ENC_IN2_GPIO_Port GPIOB
+#define ENC_B_Pin GPIO_PIN_7
+#define ENC_B_GPIO_Port GPIOB
+#define ENC_B_EXTI_IRQn EXTI9_5_IRQn
 
 /* USER CODE BEGIN Private defines */
 

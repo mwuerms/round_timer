@@ -28,6 +28,7 @@
 /* USER CODE BEGIN Includes */
 #include "disp.h"
 #include "fonts.h"
+#include "usr_in.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -60,13 +61,12 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 volatile uint32_t enc_cnt = 0;
-volatile uint32_t globa_events = 0;
+volatile uint32_t global_events = 0;
 void HAL_LPTIM_DirectionUpCallback(LPTIM_HandleTypeDef *hlptim) {
 	enc_cnt++;
 	if(enc_cnt > 999) {
 		enc_cnt = 0;
 	}
-	globa_events |= 1;
 }
 
 void HAL_LPTIM_DirectionDownCallback(LPTIM_HandleTypeDef *hlptim) {
@@ -76,7 +76,6 @@ void HAL_LPTIM_DirectionDownCallback(LPTIM_HandleTypeDef *hlptim) {
 	else {
 		enc_cnt = 999;
 	}
-	globa_events |= 2;
 }
 
 void HAL_LPTIM_AutoReloadWriteCallback(LPTIM_HandleTypeDef *hlptim) {
@@ -99,6 +98,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
+	uint32_t local_events = 0;
 
   /* USER CODE END 1 */
 
@@ -120,16 +120,17 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_LPTIM1_Init();
   MX_SPI2_Init();
   MX_USART2_UART_Init();
   MX_I2C1_Init();
   MX_LPTIM2_Init();
   /* USER CODE BEGIN 2 */
+  	usr_in_init();
+
 	disp_init();
 	disp_rotation(6, 0, 0); // correct rotation for this project
 
-	disp_fill_screen( DISP_RGB565(128, 128, 0) );
+	/*disp_fill_screen( DISP_RGB565(128, 128, 0) );
 	disp_draw_thick_line(0, 0, 240, 240, DISP_BLUE, 5);
 	disp_draw_circle(120, 120, 120, DISP_MAGENTA);
 	disp_draw_circle(120, 120, 119, DISP_YELLOW);
@@ -139,13 +140,10 @@ int main(void)
 	disp_draw_circle(120, 120, 115, DISP_YELLOW);
 	disp_draw_circle(120, 120, 114, DISP_MAGENTA);
 	disp_draw_circle(120, 120, 113, DISP_YELLOW);
-	disp_draw_circle(120, 120, 112, DISP_RED);
+	disp_draw_circle(120, 120, 112, DISP_RED);*/
 
 	disp_print(0, 100, DISP_YELLOW, DISP_RED, 0, &Font_16x26, 1, "[ja Was IST 123]@#");
 
-	//HAL_LPTIM_Encoder_Start(&hlptim1, 10);
-	HAL_LPTIM_Encoder_Start_IT(&hlptim1, 10);
-	NVIC_EnableIRQ(LPTIM1_IRQn);
 
 	HAL_LPTIM_Counter_Start_IT(&hlptim2, 32768);
 	NVIC_EnableIRQ(LPTIM2_IRQn);
@@ -158,15 +156,36 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		if(globa_events & 1) {
-			disp_power(0);
+		if(local_events & 0x0001) {
+			//disp_power(0);
+			disp_print(0, 100, DISP_CYAN, 0, 1, &Font_16x26, 1, "BTN0 pressed");
 		}
-		if(globa_events & 2) {
-			disp_power(1);
+		if(local_events & 0x0002) {
+			//disp_power(1);
+			disp_print(0, 100, DISP_MAGENTA, 0, 1, &Font_16x26, 1, "BTN0 released");
+		}
+		if(local_events & 0x0004) {
+			disp_print(0, 100, DISP_RED, 0, 1, &Font_16x26, 1, "BTN1 pressed");
+		}
+		if(local_events & 0x0008) {
+			disp_print(0, 100, DISP_YELLOW, 0, 1, &Font_16x26, 1, "BTN1 released");
+		}
+		if(local_events & 0x0010) {
+			disp_print(0, 100, DISP_BLUE, 0, 1, &Font_16x26, 1, "BTN2 pressed");
+		}
+		if(local_events & 0x0020) {
+			disp_print(0, 100, DISP_GREEN, 0, 1, &Font_16x26, 1, "BTN2 released");
+		}
+		if(local_events & 0x0040) {
+			disp_print(0, 100, DISP_BLACK, DISP_WHITE, 1, &Font_16x26, 1, "ROT ENC left");
+		}
+		if(local_events & 0x0080) {
+			disp_print(0, 100, DISP_WHITE, DISP_BLACK, 1, &Font_16x26, 1, "ROT ENC right");
 		}
 		// wait for events
-		globa_events = 0;
-		while(globa_events == 0);
+		while(global_events == 0);
+		local_events = global_events;
+		global_events = 0;
 	}
   /* USER CODE END 3 */
 }
