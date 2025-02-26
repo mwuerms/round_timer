@@ -19,6 +19,10 @@
 #define IS_ENC_A_LOW() ((ENC_A_GPIO_Port->IDR & ENC_A_Pin) == 0)
 #define IS_ENC_B_LOW() ((ENC_B_GPIO_Port->IDR & ENC_B_Pin) == 0)
 
+// count encoder steps, --: left, ++: right
+static volatile int32_t enc_abs_count = 0; // absolute, cannot be reseted
+static volatile int32_t enc_rel_count = 0; // relative, reset after reading
+// TODO debounce needed
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	// BTN0_Pin
 	if(GPIO_Pin == BTN0_Pin) {
@@ -59,20 +63,28 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			if(IS_ENC_B_LOW()) {
 				// left
 				global_events |= 0x0040;
+				enc_abs_count--;
+				enc_rel_count--;
 			}
 			else {
 				// right
 				global_events |= 0x0080;
+				enc_abs_count++;
+				enc_rel_count++;
 			}
 		}
 		else {
 			if(IS_ENC_B_LOW()) {
 				// right
 				global_events |= 0x0080;
+				enc_abs_count++;
+				enc_rel_count++;
 			}
 			else {
 				// left
 				global_events |= 0x0040;
+				enc_abs_count--;
+				enc_rel_count--;
 			}
 		}
 	}

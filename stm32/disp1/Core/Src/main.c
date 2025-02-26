@@ -29,6 +29,7 @@
 #include "disp.h"
 #include "fonts.h"
 #include "usr_in.h"
+#include "scheduler.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -144,7 +145,7 @@ int main(void)
 
 	disp_print(0, 100, DISP_YELLOW, DISP_RED, 0, &Font_16x26, 1, "[ja Was IST 123]@#");
 
-
+	scheduler_init();
 	HAL_LPTIM_Counter_Start_IT(&hlptim2, 32768);
 	NVIC_EnableIRQ(LPTIM2_IRQn);
   /* USER CODE END 2 */
@@ -153,6 +154,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 	while (1)
 	{
+		scheduler_run();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
