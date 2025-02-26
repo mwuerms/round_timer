@@ -19,6 +19,9 @@
 #define NB_OF_TASKS (16) /// number of tasks
 
 /* - typedefs --------------------------------------------------------------- */
+// return =0: do not run this task anymore
+#define TASK_RETURN_STOP (0)
+#define TASK_RETURN_KEEP_RUNNING (1)
 typedef int8_t (*task_func_t) (uint8_t event, void *data);
 
 typedef struct {

@@ -30,6 +30,8 @@
 #include "fonts.h"
 #include "usr_in.h"
 #include "scheduler.h"
+#include "app.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -61,32 +63,9 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-volatile uint32_t enc_cnt = 0;
-volatile uint32_t global_events = 0;
-void HAL_LPTIM_DirectionUpCallback(LPTIM_HandleTypeDef *hlptim) {
-	enc_cnt++;
-	if(enc_cnt > 999) {
-		enc_cnt = 0;
-	}
-}
-
-void HAL_LPTIM_DirectionDownCallback(LPTIM_HandleTypeDef *hlptim) {
-	if(enc_cnt > 0) {
-		enc_cnt--;
-	}
-	else {
-		enc_cnt = 999;
-	}
-}
-
-void HAL_LPTIM_AutoReloadWriteCallback(LPTIM_HandleTypeDef *hlptim) {
-	enc_cnt++;
-	if(enc_cnt > 999) {
-		enc_cnt = 0;
-	}
-	/*if(hlptim == &hlptim2) {
-		globa_events |= 1;
-	}*/
+void HAL_LPTIM_AutoReloadMatchCallback(LPTIM_HandleTypeDef *hlptim) {
+	__NOP();
+	scheduler_send_event(ev_timer_task_id, 1, NULL);
 }
 
 /* USER CODE END 0 */
@@ -99,8 +78,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	uint32_t local_events = 0;
-
+	event_t tev;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -130,24 +108,18 @@ int main(void)
 
 	disp_init();
 	disp_rotation(6, 0, 0); // correct rotation for this project
-
-	/*disp_fill_screen( DISP_RGB565(128, 128, 0) );
-	disp_draw_thick_line(0, 0, 240, 240, DISP_BLUE, 5);
-	disp_draw_circle(120, 120, 120, DISP_MAGENTA);
-	disp_draw_circle(120, 120, 119, DISP_YELLOW);
-	disp_draw_circle(120, 120, 118, DISP_MAGENTA);
-	disp_draw_circle(120, 120, 117, DISP_YELLOW);
-	disp_draw_circle(120, 120, 116, DISP_MAGENTA);
-	disp_draw_circle(120, 120, 115, DISP_YELLOW);
-	disp_draw_circle(120, 120, 114, DISP_MAGENTA);
-	disp_draw_circle(120, 120, 113, DISP_YELLOW);
-	disp_draw_circle(120, 120, 112, DISP_RED);*/
-
 	disp_print(0, 100, DISP_YELLOW, DISP_RED, 0, &Font_16x26, 1, "[ja Was IST 123]@#");
 
 	scheduler_init();
-	HAL_LPTIM_Counter_Start_IT(&hlptim2, 32768);
+	app_init();
+
+	HAL_LPTIM_Counter_Start_IT(&hlptim2, 32000); // 10 ms
 	NVIC_EnableIRQ(LPTIM2_IRQn);
+
+	tev.data = NULL;
+	tev.event = 100;
+	tev.tid = app_ev_task_id;
+	events_add_single_timer_event(10, &tev); // 100 * 10 ms
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -158,36 +130,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		if(local_events & 0x0001) {
-			//disp_power(0);
-			disp_print(0, 100, DISP_CYAN, 0, 1, &Font_16x26, 1, "BTN0 pressed");
-		}
-		if(local_events & 0x0002) {
-			//disp_power(1);
-			disp_print(0, 100, DISP_MAGENTA, 0, 1, &Font_16x26, 1, "BTN0 released");
-		}
-		if(local_events & 0x0004) {
-			disp_print(0, 100, DISP_RED, 0, 1, &Font_16x26, 1, "BTN1 pressed");
-		}
-		if(local_events & 0x0008) {
-			disp_print(0, 100, DISP_YELLOW, 0, 1, &Font_16x26, 1, "BTN1 released");
-		}
-		if(local_events & 0x0010) {
-			disp_print(0, 100, DISP_BLUE, 0, 1, &Font_16x26, 1, "BTN2 pressed");
-		}
-		if(local_events & 0x0020) {
-			disp_print(0, 100, DISP_GREEN, 0, 1, &Font_16x26, 1, "BTN2 released");
-		}
-		if(local_events & 0x0040) {
-			disp_print(0, 100, DISP_BLACK, DISP_WHITE, 1, &Font_16x26, 1, "ROT ENC left");
-		}
-		if(local_events & 0x0080) {
-			disp_print(0, 100, DISP_WHITE, DISP_BLACK, 1, &Font_16x26, 1, "ROT ENC right");
-		}
-		// wait for events
-		while(global_events == 0);
-		local_events = global_events;
-		global_events = 0;
 	}
   /* USER CODE END 3 */
 }

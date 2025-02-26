@@ -109,7 +109,7 @@ void disp_draw_thick_line(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16
 void disp_draw_triangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint16_t color);
 void disp_draw_filled_triangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint16_t color);
 void disp_draw_pixel(int16_t x, int16_t y, uint16_t color);
-void disp_draw_filled_Circle(int16_t x0, int16_t y0, int16_t radius, uint16_t fill_color);
+void disp_draw_filled_circle(int16_t x0, int16_t y0, int16_t radius, uint16_t fill_color);
 void disp_draw_circle(int16_t x0, int16_t y0, int16_t radius, uint16_t color);
 void disp_draw_char(uint16_t x, uint16_t y, uint16_t text_color, uint16_t bg_color, uint8_t transparent_Bg, FontDef_t *font, uint8_t multiplier, unsigned char ch);
 void disp_print(uint16_t x, uint16_t y, uint16_t text_color, uint16_t bg_color, uint8_t transparent_bg, FontDef_t *font, uint8_t multiplier, char *str);

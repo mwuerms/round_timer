@@ -13,11 +13,15 @@ extern "C" {
 #include "stdint.h"
 
 // - events
+/*
 #define EV_USR_IN_BTN0
 #define EV_USR_IN_BTN1
 #define EV_USR_IN_BTN2
 #define EV_USR_IN_ENC_LEFT
 #define EV_USR_IN_ENC_RIGHT
+*/
+#define EV_BTN0_PRESSED (1)
+#define EV_BTN0_RELEASED (2)
 
 // - public functions ---------
 void usr_in_init(void);

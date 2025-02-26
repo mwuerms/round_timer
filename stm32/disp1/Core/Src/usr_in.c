@@ -5,6 +5,8 @@
 
 #include "usr_in.h"
 #include "stdbool.h"
+#include "scheduler.h"
+#include "app.h"
 
 // - GPIOs ------------------------------------
 #include "main.h"
@@ -22,19 +24,26 @@
 // count encoder steps, --: left, ++: right
 static volatile int32_t enc_abs_count = 0; // absolute, cannot be reseted
 static volatile int32_t enc_rel_count = 0; // relative, reset after reading
-// TODO debounce needed
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	// BTN0_Pin
 	if(GPIO_Pin == BTN0_Pin) {
 		if(IS_BTN0_LOW()) {
 			// pressed
-			global_events |= 0x0001;
+			scheduler_send_event(app_ev_task_id, EV_BTN0_PRESSED, NULL);
 		}
 		else {
 			// released
-			global_events |= 0x0002;
+			scheduler_send_event(app_ev_task_id, EV_BTN0_RELEASED, NULL);
 		}
 	}
+}
+
+
+
+/*
+// TODO debounce needed
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	// BTN1_Pin
 	if(GPIO_Pin == BTN1_Pin) {
 		if(IS_BTN1_LOW()) {
@@ -88,7 +97,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			}
 		}
 	}
-}
+}*/
 
 void usr_in_init(void) {
 	return;

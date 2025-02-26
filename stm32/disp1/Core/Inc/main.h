@@ -53,7 +53,7 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-extern volatile uint32_t global_events;
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

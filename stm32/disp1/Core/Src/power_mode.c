@@ -57,18 +57,25 @@ void power_mode_release(uint8_t mode) {
 }
 
 void power_mode_sleep(void) {
+	__enable_irq();
+	while (events_is_main_fifo_empty() == true);
+	return;
+
 	switch(get_deepest_power_mode()) {
 		case POWER_MODE_NONE:
 			// do not go to power, just idle here
+			__enable_irq();
 			while (events_is_main_fifo_empty() == true);
 			break;
 		case POWER_MODE_1:
 			// - mcu specific code here ------------
-				while (events_is_main_fifo_empty() == true);
+			__enable_irq();
+			while (events_is_main_fifo_empty() == true);
 			break;
 		case POWER_MODE_2:
 			// - mcu specific code here ------------
-				while (events_is_main_fifo_empty() == true);
+			__enable_irq();
+			while (events_is_main_fifo_empty() == true);
 			break;
 	}
 	return;

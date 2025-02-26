@@ -113,13 +113,14 @@ static inline void get_compare_from_timer_event_fifo(void) {
 
 static int8_t ev_timer_hal_task(uint8_t event, void *data) {
 	uint16_t n, sr;
+	lock_interrupt(sr);
     ev_timer_CNT++;
-	printf("ev_timer_hal_task(ev: %d)\n", event);
-	printf("  CNT:     %d\n", ev_timer_CNT);
-	printf("  COMPARE: %d\n", ev_timer_COMPARE);
+	//printf("ev_timer_hal_task(ev: %d)\n", event);
+	//printf("  CNT:     %d\n", ev_timer_CNT);
+	//printf("  COMPARE: %d\n", ev_timer_COMPARE);
 	if(ev_timer_CNT == ev_timer_COMPARE) {
-		lock_interrupt(sr);
-		printf("  COMPARE == CNT\n");
+		//lock_interrupt(sr);
+		//printf("  COMPARE == CNT\n");
 
 		for(n = events_timer_fifo.size; n != 0; n --) {
 			// get the first timer event
@@ -128,7 +129,7 @@ static int8_t ev_timer_hal_task(uint8_t event, void *data) {
 					// this timer event is active, does it macht?
 					if(events_timer_fifo_data[events_timer_fifo.rd_proc].compare == ev_timer_CNT) {
 						// match: send the timer event and set this timer event inactive
-						printf("  match at CNT: %d\n", ev_timer_CNT);
+						//printf("  match at CNT: %d\n", ev_timer_CNT);
 						scheduler_send_event(events_timer_fifo_data[events_timer_fifo.rd_proc].event.tid,
 							events_timer_fifo_data[events_timer_fifo.rd_proc].event.event,
 							events_timer_fifo_data[events_timer_fifo.rd_proc].event.data);
@@ -201,6 +202,8 @@ static void events_move_elements_in_timer_fifo_right(uint16_t from, uint16_t to)
 }
 
 // - public functions ----------------------------------------------------------
+uint8_t ev_timer_task_id;
+
 void events_init(void) {
 	// event main_fifo
 	fifo_init(&events_main_fifo, (void *)events_main_fifo_data, EVENTS_MAIN_FIFO_SIZE);
@@ -214,6 +217,7 @@ void events_init(void) {
     ev_timer_proc.name = ev_timer_name;
     ev_timer_proc.task = ev_timer_hal_task;
     scheduler_add_task(&ev_timer_proc);
+    ev_timer_task_id = ev_timer_proc.tid;
 }
 
 uint8_t events_add_to_main_fifo(event_t *ev) {

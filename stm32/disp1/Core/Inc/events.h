@@ -29,6 +29,7 @@ typedef struct {
 #define EV_POLL    252
 
 // - public functions ----------------------------------------------------------
+extern uint8_t ev_timer_task_id;
 
 /**
  * initialize the events
