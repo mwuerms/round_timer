@@ -27,6 +27,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "disp.h"
+#include "fonts.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -59,11 +60,13 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 volatile uint32_t enc_cnt = 0;
+volatile uint32_t globa_events = 0;
 void HAL_LPTIM_DirectionUpCallback(LPTIM_HandleTypeDef *hlptim) {
 	enc_cnt++;
 	if(enc_cnt > 999) {
 		enc_cnt = 0;
 	}
+	globa_events |= 1;
 }
 
 void HAL_LPTIM_DirectionDownCallback(LPTIM_HandleTypeDef *hlptim) {
@@ -73,6 +76,7 @@ void HAL_LPTIM_DirectionDownCallback(LPTIM_HandleTypeDef *hlptim) {
 	else {
 		enc_cnt = 999;
 	}
+	globa_events |= 2;
 }
 
 void HAL_LPTIM_AutoReloadWriteCallback(LPTIM_HandleTypeDef *hlptim) {
@@ -80,7 +84,11 @@ void HAL_LPTIM_AutoReloadWriteCallback(LPTIM_HandleTypeDef *hlptim) {
 	if(enc_cnt > 999) {
 		enc_cnt = 0;
 	}
+	/*if(hlptim == &hlptim2) {
+		globa_events |= 1;
+	}*/
 }
+
 /* USER CODE END 0 */
 
 /**
@@ -116,33 +124,50 @@ int main(void)
   MX_SPI2_Init();
   MX_USART2_UART_Init();
   MX_I2C1_Init();
+  MX_LPTIM2_Init();
   /* USER CODE BEGIN 2 */
-  disp_init();
-  disp_fill_screen( DISP_RGB565(255, 0, 0) );
-  disp_draw_thick_line(0, 0, 240, 240, DISP_CYAN, 5);
-  disp_draw_circle(120, 120, 120, DISP_MAGENTA);
-  disp_draw_circle(120, 120, 119, DISP_YELLOW);
-  disp_draw_circle(120, 120, 118, DISP_MAGENTA);
-  disp_draw_circle(120, 120, 117, DISP_YELLOW);
-  disp_draw_circle(120, 120, 116, DISP_MAGENTA);
-  disp_draw_circle(120, 120, 115, DISP_YELLOW);
-  disp_draw_circle(120, 120, 114, DISP_MAGENTA);
-  disp_draw_circle(120, 120, 113, DISP_YELLOW);
-  disp_draw_circle(120, 120, 112, DISP_RED);
+	disp_init();
+	disp_rotation(6, 0, 0); // correct rotation for this project
 
-  //HAL_LPTIM_Encoder_Start(&hlptim1, 10);
-  HAL_LPTIM_Encoder_Start_IT(&hlptim1, 1);
-  NVIC_EnableIRQ(LPTIM1_IRQn);
+	disp_fill_screen( DISP_RGB565(128, 128, 0) );
+	disp_draw_thick_line(0, 0, 240, 240, DISP_BLUE, 5);
+	disp_draw_circle(120, 120, 120, DISP_MAGENTA);
+	disp_draw_circle(120, 120, 119, DISP_YELLOW);
+	disp_draw_circle(120, 120, 118, DISP_MAGENTA);
+	disp_draw_circle(120, 120, 117, DISP_YELLOW);
+	disp_draw_circle(120, 120, 116, DISP_MAGENTA);
+	disp_draw_circle(120, 120, 115, DISP_YELLOW);
+	disp_draw_circle(120, 120, 114, DISP_MAGENTA);
+	disp_draw_circle(120, 120, 113, DISP_YELLOW);
+	disp_draw_circle(120, 120, 112, DISP_RED);
+
+	disp_print(0, 100, DISP_YELLOW, DISP_RED, 0, &Font_16x26, 1, "[ja Was IST 123]@#");
+
+	//HAL_LPTIM_Encoder_Start(&hlptim1, 10);
+	HAL_LPTIM_Encoder_Start_IT(&hlptim1, 10);
+	NVIC_EnableIRQ(LPTIM1_IRQn);
+
+	HAL_LPTIM_Counter_Start_IT(&hlptim2, 32768);
+	NVIC_EnableIRQ(LPTIM2_IRQn);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
+	while (1)
+	{
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+		if(globa_events & 1) {
+			disp_power(0);
+		}
+		if(globa_events & 2) {
+			disp_power(1);
+		}
+		// wait for events
+		globa_events = 0;
+		while(globa_events == 0);
+	}
   /* USER CODE END 3 */
 }
 
@@ -165,9 +190,10 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {

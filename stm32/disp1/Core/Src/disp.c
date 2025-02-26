@@ -917,12 +917,12 @@ void disp_rotation(uint8_t rotation, uint8_t vert_mirror, uint8_t horiz_mirror)
 
 	if (vert_mirror)
 	{
-		Value = DISP_MADCTL_ML;
+		Value |= DISP_MADCTL_ML;
 	}
 
 	if (horiz_mirror)
 	{
-		Value = DISP_MADCTL_MH;
+		Value |= DISP_MADCTL_MH;
 	}
 
 	// RGB or BGR
