@@ -111,7 +111,8 @@ static inline void get_compare_from_timer_event_fifo(void) {
 	DEBUG_PRINTF_MESSAGE(" current compare: %d\n", ev_timer_COMPARE);
 }
 
-static int8_t ev_timer_hal_task(uint8_t event, void *data) {
+//static int8_t ev_timer_hal_task(uint8_t event, void *data) {
+void ev_timer_ISR(void) {
 	uint16_t n, sr;
 	lock_interrupt(sr);
     ev_timer_CNT++;
@@ -150,12 +151,12 @@ static int8_t ev_timer_hal_task(uint8_t event, void *data) {
 	}
 
 	restore_interrupt(sr);
-    return(1);
+    //return(1);
 }
 
 static uint32_t ev_timer_get_current_time(void) {
     uint32_t time;
-    uint16_t sr;
+    uint32_t sr;
     
     lock_interrupt(sr);
     time = ev_timer_CNT;
@@ -202,7 +203,6 @@ static void events_move_elements_in_timer_fifo_right(uint16_t from, uint16_t to)
 }
 
 // - public functions ----------------------------------------------------------
-uint8_t ev_timer_task_id;
 
 void events_init(void) {
 	// event main_fifo
@@ -214,14 +214,13 @@ void events_init(void) {
     fifo_init(&events_timer_fifo, events_timer_fifo_data, EV_TIMER_NB_EVENTS);
 
     ev_timer_CNT = 0;
-    ev_timer_proc.name = ev_timer_name;
+    /*ev_timer_proc.name = ev_timer_name;
     ev_timer_proc.task = ev_timer_hal_task;
-    scheduler_add_task(&ev_timer_proc);
-    ev_timer_task_id = ev_timer_proc.tid;
+    scheduler_add_task(&ev_timer_proc);*/
 }
 
 uint8_t events_add_to_main_fifo(event_t *ev) {
-	uint16_t sr;
+	uint32_t sr;
 	DEBUG_PRINTF_MESSAGE("events_main_fifo_write: (wr: %d, rd:%d, size: %d)",
 				events_main_fifo.wr,
 				events_main_fifo.rd,
@@ -252,7 +251,7 @@ uint8_t events_add_to_main_fifo(event_t *ev) {
 }
 
 uint8_t events_get_from_main_fifo(event_t *ev) {
-	uint16_t sr;
+	uint32_t sr;
 	DEBUG_PRINTF_MESSAGE("events_get_from_main_fifo():  (wr: %d, rd:%d, size: %d)\n",
 				events_main_fifo.wr, events_main_fifo.rd, events_main_fifo.size);
     // sanity checks

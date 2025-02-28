@@ -248,7 +248,7 @@ void EXTI9_5_IRQHandler(void)
 void LPTIM2_IRQHandler(void)
 {
   /* USER CODE BEGIN LPTIM2_IRQn 0 */
-
+	main_lptim2_isr();
   /* USER CODE END LPTIM2_IRQn 0 */
   HAL_LPTIM_IRQHandler(&hlptim2);
   /* USER CODE BEGIN LPTIM2_IRQn 1 */

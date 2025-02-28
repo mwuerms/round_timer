@@ -58,16 +58,27 @@
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-
+//HAL_GPIO_WritePin(DBG1_GPIO_Port, DBG1_Pin, GPIO_PIN_SET);
+#define set_pin(x)  HAL_GPIO_WritePin(x##_GPIO_Port, x##_Pin, GPIO_PIN_SET);
+//HAL_GPIO_WritePin(DBG1_GPIO_Port, DBG1_Pin, GPIO_PIN_RESET);
+#define clr_pin(x)  HAL_GPIO_WritePin(x##_GPIO_Port, x##_Pin, GPIO_PIN_RESET);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 void HAL_LPTIM_AutoReloadMatchCallback(LPTIM_HandleTypeDef *hlptim) {
-	__NOP();
-	scheduler_send_event(ev_timer_task_id, 1, NULL);
-}
+//void main_lptim2_isr(void) {
 
+	set_pin(DBG1);
+	ev_timer_ISR();
+	clr_pin(DBG1);
+	//HAL_GPIO_WritePin(DBG0_GPIO_Port, DBG0_Pin, GPIO_PIN_RESET);
+	clr_pin(DBG0);
+}
+void main_lptim2_isr(void) {
+	//HAL_GPIO_WritePin(DBG0_GPIO_Port, DBG0_Pin, GPIO_PIN_SET);
+	set_pin(DBG0);
+}
 /* USER CODE END 0 */
 
 /**
@@ -108,18 +119,27 @@ int main(void)
 
 	disp_init();
 	disp_rotation(6, 0, 0); // correct rotation for this project
-	disp_print(0, 100, DISP_YELLOW, DISP_RED, 0, &Font_16x26, 1, "[ja Was IST 123]@#");
 
 	scheduler_init();
 	app_init();
 
 	HAL_LPTIM_Counter_Start_IT(&hlptim2, 32000); // 10 ms
+	//LL_LPTIM_StartCounter(LPTIM2, LL_LPTIM_OPERATING_MODE_CONTINUOUS);
 	NVIC_EnableIRQ(LPTIM2_IRQn);
-
+/*
 	tev.data = NULL;
 	tev.event = 100;
 	tev.tid = app_ev_task_id;
-	events_add_single_timer_event(10, &tev); // 100 * 10 ms
+	events_add_single_timer_event(3, &tev); // 100 * 10 ms
+	tev.event = 101;
+	events_add_single_timer_event(4, &tev); // 100 * 10 ms
+	tev.event = 102;
+	events_add_single_timer_event(7, &tev); // 100 * 10 ms
+	tev.event = 103;
+	events_add_single_timer_event(12, &tev); // 100 * 10 ms*/
+
+	HAL_GPIO_WritePin(DBG0_GPIO_Port, DBG0_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(DBG1_GPIO_Port, DBG1_Pin, GPIO_PIN_RESET);
   /* USER CODE END 2 */
 
   /* Infinite loop */

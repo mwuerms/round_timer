@@ -8,6 +8,8 @@
 #include "scheduler.h"
 #include "app.h"
 
+// - events, see app (receiver)
+
 // - GPIOs ------------------------------------
 #include "main.h"
 // BTN0_GPIO_Port, BTN0_Pin
@@ -22,8 +24,8 @@
 #define IS_ENC_B_LOW() ((ENC_B_GPIO_Port->IDR & ENC_B_Pin) == 0)
 
 // count encoder steps, --: left, ++: right
-static volatile int32_t enc_abs_count = 0; // absolute, cannot be reseted
-static volatile int32_t enc_rel_count = 0; // relative, reset after reading
+static volatile int16_t enc_abs_count = 0; // absolute, cannot be reseted
+static volatile int16_t enc_rel_count = 0; // relative, reset after reading
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	// BTN0_Pin
@@ -37,33 +39,26 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			scheduler_send_event(app_ev_task_id, EV_BTN0_RELEASED, NULL);
 		}
 	}
-}
-
-
-
-/*
-// TODO debounce needed
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	// BTN1_Pin
 	if(GPIO_Pin == BTN1_Pin) {
 		if(IS_BTN1_LOW()) {
 			// pressed
-			global_events |= 0x0004;
+			scheduler_send_event(app_ev_task_id, EV_BTN1_PRESSED, NULL);
 		}
 		else {
 			// released
-			global_events |= 0x0008;
+			scheduler_send_event(app_ev_task_id, EV_BTN1_RELEASED, NULL);
 		}
 	}
 	// BTN2_Pin
 	if(GPIO_Pin == BTN2_Pin) {
 		if(IS_BTN2_LOW()) {
 			// pressed
-			global_events |= 0x0010;
+			scheduler_send_event(app_ev_task_id, EV_BTN2_PRESSED, NULL);
 		}
 		else {
 			// released
-			global_events |= 0x0020;
+			scheduler_send_event(app_ev_task_id, EV_BTN2_RELEASED, NULL);
 		}
 	}
 	// ENC_A_Pin + ENC_B_Pin
@@ -71,13 +66,13 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 		if(IS_ENC_A_LOW()) {
 			if(IS_ENC_B_LOW()) {
 				// left
-				global_events |= 0x0040;
+				scheduler_send_event(app_ev_task_id, EV_ENC_LEFT, NULL);
 				enc_abs_count--;
 				enc_rel_count--;
 			}
 			else {
 				// right
-				global_events |= 0x0080;
+				scheduler_send_event(app_ev_task_id, EV_ENC_RIGHT, NULL);
 				enc_abs_count++;
 				enc_rel_count++;
 			}
@@ -85,19 +80,19 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 		else {
 			if(IS_ENC_B_LOW()) {
 				// right
-				global_events |= 0x0080;
+				scheduler_send_event(app_ev_task_id, EV_ENC_RIGHT, NULL);
 				enc_abs_count++;
 				enc_rel_count++;
 			}
 			else {
 				// left
-				global_events |= 0x0040;
+				scheduler_send_event(app_ev_task_id, EV_ENC_LEFT, NULL);
 				enc_abs_count--;
 				enc_rel_count--;
 			}
 		}
 	}
-}*/
+}
 
 void usr_in_init(void) {
 	return;
@@ -109,4 +104,12 @@ void usr_in_enable(uint32_t mask) {
 
 void usr_in_disable(uint32_t mask) {
 	return;
+}
+
+int16_t usr_in_get_enc_abs_count(void) {
+	return enc_abs_count;
+}
+
+int16_t usr_in_get_enc_rel_count(void) {
+	return enc_rel_count;
 }

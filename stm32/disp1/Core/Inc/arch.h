@@ -50,7 +50,7 @@
     }
  */
 
-// declare previously uint32_t prim;
+// declare previously uint32_t sr;
 #define lock_interrupt(x)		x = __get_PRIMASK(); \
 								__disable_irq()
 

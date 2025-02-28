@@ -53,7 +53,7 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+void main_lptim2_isr(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -73,6 +73,10 @@ void Error_Handler(void);
 #define DISP_MISO_GPIO_Port GPIOB
 #define DISP_MOSI_Pin GPIO_PIN_15
 #define DISP_MOSI_GPIO_Port GPIOB
+#define DBG0_Pin GPIO_PIN_10
+#define DBG0_GPIO_Port GPIOC
+#define DBG1_Pin GPIO_PIN_11
+#define DBG1_GPIO_Port GPIOC
 #define BTN2_Pin GPIO_PIN_3
 #define BTN2_GPIO_Port GPIOB
 #define BTN2_EXTI_IRQn EXTI3_IRQn
