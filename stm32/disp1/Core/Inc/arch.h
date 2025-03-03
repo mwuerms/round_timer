@@ -50,11 +50,28 @@
     }
  */
 
-// declare previously uint32_t sr;
+// declare previously uint32_t primask_bit;
 #define lock_interrupt(x)		x = __get_PRIMASK(); \
 								__disable_irq()
 
 #define restore_interrupt(x)	if (!x) {__enable_irq();}
+
+#if 0
+// from stm32l4xx_ll_lptim.c
+void LL_LPTIM_Disable(LPTIM_TypeDef *LPTIMx)
+{
+	uint32_t primask_bit;
+	/* Enter critical section */
+	primask_bit = __get_PRIMASK();
+
+	// ... do stuff
+
+	__set_PRIMASK(1) ;
+	/* Exit critical section: restore previous priority mask */
+	__set_PRIMASK(primask_bit);
+}
+#endif
+
 #else
 
 // no specific arcitecture defined

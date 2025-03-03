@@ -62,7 +62,7 @@ uint16_t fifo_try_append(fifo_t *f) {
         // error, invalid pointer
         return false;
     }
-    if(fifo_is_full(f) == true) {
+    if(fifo_is_full_inline(f) == true) {
         // error, is full
         return false;
     }

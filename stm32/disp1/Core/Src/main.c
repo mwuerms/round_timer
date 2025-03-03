@@ -66,19 +66,16 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void HAL_LPTIM_AutoReloadMatchCallback(LPTIM_HandleTypeDef *hlptim) {
-//void main_lptim2_isr(void) {
-
+void main_lptim2_isr(void) {
+	LL_LPTIM_ClearFlag_CMPM(LPTIM2);
+	//HAL_GPIO_WritePin(DBG0_GPIO_Port, DBG0_Pin, GPIO_PIN_SET);
+	set_pin(DBG0);
 	set_pin(DBG1);
 	ev_timer_ISR();
 	clr_pin(DBG1);
-	//HAL_GPIO_WritePin(DBG0_GPIO_Port, DBG0_Pin, GPIO_PIN_RESET);
 	clr_pin(DBG0);
 }
-void main_lptim2_isr(void) {
-	//HAL_GPIO_WritePin(DBG0_GPIO_Port, DBG0_Pin, GPIO_PIN_SET);
-	set_pin(DBG0);
-}
+
 /* USER CODE END 0 */
 
 /**
@@ -115,17 +112,19 @@ int main(void)
   MX_I2C1_Init();
   MX_LPTIM2_Init();
   /* USER CODE BEGIN 2 */
+  	HAL_GPIO_WritePin(DBG0_GPIO_Port, DBG0_Pin, GPIO_PIN_RESET);
+  	HAL_GPIO_WritePin(DBG1_GPIO_Port, DBG1_Pin, GPIO_PIN_RESET);
+
   	usr_in_init();
 
 	disp_init();
 	disp_rotation(6, 0, 0); // correct rotation for this project
 
+	// call MX_LPTIM2_Init(); before, scheduler, event_timer uses LPTIM2
 	scheduler_init();
+	events_start_timer(1);
 	app_init();
 
-	HAL_LPTIM_Counter_Start_IT(&hlptim2, 32000); // 10 ms
-	//LL_LPTIM_StartCounter(LPTIM2, LL_LPTIM_OPERATING_MODE_CONTINUOUS);
-	NVIC_EnableIRQ(LPTIM2_IRQn);
 /*
 	tev.data = NULL;
 	tev.event = 100;
@@ -138,8 +137,7 @@ int main(void)
 	tev.event = 103;
 	events_add_single_timer_event(12, &tev); // 100 * 10 ms*/
 
-	HAL_GPIO_WritePin(DBG0_GPIO_Port, DBG0_Pin, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(DBG1_GPIO_Port, DBG1_Pin, GPIO_PIN_RESET);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */

@@ -12,6 +12,9 @@ extern "C" {
 
 #include "stdint.h"
 
+// - timeout isr --------------
+void usr_in_timout_isr(void);
+
 // - public functions ---------
 void usr_in_init(void);
 

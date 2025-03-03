@@ -29,7 +29,10 @@ typedef struct {
 #define EV_POLL    252
 
 // - public functions ----------------------------------------------------------
-void ev_timer_ISR(void);
+/**
+ * call this funciton from hardware timer ISR
+ */
+void event_timer_ISR(void);
 
 /**
  * initialize the events

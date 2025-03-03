@@ -7,6 +7,7 @@
 #include "stdbool.h"
 #include "scheduler.h"
 #include "app.h"
+#include "lptim.h"
 
 // - events, see app (receiver)
 

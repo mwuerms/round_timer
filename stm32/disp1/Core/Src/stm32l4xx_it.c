@@ -55,7 +55,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-extern LPTIM_HandleTypeDef hlptim2;
+
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -248,9 +248,8 @@ void EXTI9_5_IRQHandler(void)
 void LPTIM2_IRQHandler(void)
 {
   /* USER CODE BEGIN LPTIM2_IRQn 0 */
-	main_lptim2_isr();
+	event_timer_ISR();
   /* USER CODE END LPTIM2_IRQn 0 */
-  HAL_LPTIM_IRQHandler(&hlptim2);
   /* USER CODE BEGIN LPTIM2_IRQn 1 */
 
   /* USER CODE END LPTIM2_IRQn 1 */
