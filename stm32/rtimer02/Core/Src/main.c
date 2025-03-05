@@ -24,6 +24,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "disp.h"
 
 /* USER CODE END Includes */
 
@@ -57,6 +58,7 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
 
 /* USER CODE END 0 */
 
@@ -92,6 +94,51 @@ int main(void)
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
 
+	HAL_GPIO_WritePin(DBG0_GPIO_Port, DBG0_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(DBG1_GPIO_Port, DBG1_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(DBG0_GPIO_Port, DBG0_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(DBG1_GPIO_Port, DBG1_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(DBG0_GPIO_Port, DBG0_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(DBG1_GPIO_Port, DBG1_Pin, GPIO_PIN_RESET);
+
+
+	for(volatile uint32_t cnt = 0; cnt < 10000; cnt++); // 6 ms
+	HAL_GPIO_WritePin(DBG0_GPIO_Port, DBG0_Pin, GPIO_PIN_SET);
+	for(volatile uint32_t cnt = 0; cnt < 20000; cnt++); // 13 ms
+	HAL_GPIO_WritePin(DBG1_GPIO_Port, DBG1_Pin, GPIO_PIN_SET);
+	for(volatile uint32_t cnt = 0; cnt < 30000; cnt++); // 19 ms
+	HAL_GPIO_WritePin(DBG0_GPIO_Port, DBG0_Pin, GPIO_PIN_RESET);
+	for(volatile uint32_t cnt = 0; cnt < 500000; cnt++); // 347 ms
+	HAL_GPIO_WritePin(DBG1_GPIO_Port, DBG1_Pin, GPIO_PIN_RESET);
+
+	// 50 ms -> 30000/19 * 50 = 79000
+	// 100 ms -> 160000
+	// 150 ms -> 240000
+	//for(volatile uint32_t cnt = 0; cnt < (1*80000); cnt++); // 56 ms
+	for(volatile uint32_t cnt = 0; cnt < (1*79000); cnt++); // 55 ms
+	HAL_GPIO_WritePin(DBG0_GPIO_Port, DBG0_Pin, GPIO_PIN_SET);
+	//for(volatile uint32_t cnt = 0; cnt < (2*80000); cnt++); // 110 ms
+	for(volatile uint32_t cnt = 0; cnt < (2*79000); cnt++); // 110 ms
+	HAL_GPIO_WritePin(DBG1_GPIO_Port, DBG1_Pin, GPIO_PIN_SET);
+	//for(volatile uint32_t cnt = 0; cnt < (3*80000); cnt++); // 166 ms
+	for(volatile uint32_t cnt = 0; cnt < (3*79000); cnt++); // 166 ms
+	HAL_GPIO_WritePin(DBG1_GPIO_Port, DBG1_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(DBG0_GPIO_Port, DBG0_Pin, GPIO_PIN_RESET);
+
+	disp_init();
+	disp_rotation(6, 0, 0); // correct rotation for this project
+
+	app_init();
+  	usr_in_init();
+
+
+	HAL_GPIO_WritePin(DBG0_GPIO_Port, DBG0_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(DBG1_GPIO_Port, DBG1_Pin, GPIO_PIN_SET);
+
+	//disp_print(20, 80, DISP_COLOR_RED, DISP_COLOR_WHITE, 1, &Font_16x26, 0, ".-=' INIT '=-.");
+
+	HAL_GPIO_WritePin(DBG0_GPIO_Port, DBG0_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(DBG1_GPIO_Port, DBG1_Pin, GPIO_PIN_RESET);
   /* USER CODE END 2 */
 
   /* Init scheduler */

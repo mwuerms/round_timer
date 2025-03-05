@@ -69,16 +69,25 @@ void Error_Handler(void);
 #define DISP_MISO_GPIO_Port GPIOB
 #define DISP_MOSI_Pin GPIO_PIN_15
 #define DISP_MOSI_GPIO_Port GPIOB
+#define DBG0_Pin GPIO_PIN_10
+#define DBG0_GPIO_Port GPIOC
+#define DBG1_Pin GPIO_PIN_11
+#define DBG1_GPIO_Port GPIOC
 #define BTN0_Pin GPIO_PIN_3
 #define BTN0_GPIO_Port GPIOB
+#define BTN0_EXTI_IRQn EXTI3_IRQn
 #define BTN1_Pin GPIO_PIN_4
 #define BTN1_GPIO_Port GPIOB
+#define BTN1_EXTI_IRQn EXTI4_IRQn
 #define ENC_A_Pin GPIO_PIN_5
 #define ENC_A_GPIO_Port GPIOB
+#define ENC_A_EXTI_IRQn EXTI9_5_IRQn
 #define BTN2_Pin GPIO_PIN_6
 #define BTN2_GPIO_Port GPIOB
+#define BTN2_EXTI_IRQn EXTI9_5_IRQn
 #define ENC_B_Pin GPIO_PIN_7
 #define ENC_B_GPIO_Port GPIOB
+#define ENC_B_EXTI_IRQn EXTI9_5_IRQn
 
 /* USER CODE BEGIN Private defines */
 
