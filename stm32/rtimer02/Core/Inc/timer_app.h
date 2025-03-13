@@ -21,7 +21,7 @@ void timer_app_init(void);
 /**
  * draw timer_app background, basic structure
  */
-void timer_app_draw_bg(void);
+void timer_app_draw(void);
 
 #ifdef __cplusplus
 }

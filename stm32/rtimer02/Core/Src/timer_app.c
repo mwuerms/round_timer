@@ -5,136 +5,104 @@
 
 #include "timer_app.h"
 #include <string.h>
+#include "gui.h"
 #include "disp.h"
+#include <string.h>
 
-#define NB_TIMERS (4)
+#define TIMER_APP_STR_FONT Font_16x26
+#define TIMER_APP_NUM_FONT Font_16x28
+
+#define TIMER_APP_NB_TIMERS (4)
 static struct {
 	uint16_t state;
+    uint8_t current_timer;
+    uint8_t cursor_pos;
 } timer_app_ctrl;
+#define TIMER_APP_STATE_STOP (0)
+#define TIMER_APP_STATE_RUNNING (1)
+#define TIMER_APP_STATE_PAUSE (2)
+#define TIMER_APP_STATE_ALARM (3)
 
 typedef struct {
 	uint16_t secs, ms; // max secs: 65535 = 18:12:15 (HH:MM:SS), ms: 0 ... 999 Milliseconds
 	uint8_t hour, min, sec, x; // x: dummy byte
 } time_x_t;
 
-static time_x_t timers[NB_TIMERS];
+static time_x_t timers[TIMER_APP_NB_TIMERS];
 
 void timer_app_init(void) {
 	memset(timers, 0, sizeof(timers));
-
 }
 
-#define TIMER_APP_STR_FONT Font_16x26
-#define TIMER_APP_NUM_FONT Font_16x28
+#define TIMER_APP_GUI_COLOR DISP_COLOR_CYAN
 
-#include <string.h>
-/**
- * print some text on the display
- * @param	text	to print
- * @param	x0		x position, left upper conrner
- * @param	y0		y position, left upper conrner
- * @param	center	=true: do center text, =false: use x0
- * @param	space	space between box and text
- * @param	text_color
- * @param	bg_color
- * @param	transparent_bg	=false: do not use bg_colr
- */
-void gui_text(char *text, uint16_t x0, uint16_t y0, uint8_t center, uint16_t text_color, uint16_t bg_color, uint8_t transparent_bg, FontDef_t *font) {
-	uint16_t fwid, nb_chars;
-	// some checks first
-	if((x0 > DISP_WIDTH) || (y0 > DISP_HEIGHT)){
-		// error, outside display
-		return;
-	}
-	if(text == NULL) {
-		// error, no text
-		return;
-	}
-	fwid = (uint16_t)font->FontWidth;
-	//fhi  = (uint16_t)font->FontHeight;
-	nb_chars = (uint16_t)strlen(text)-1;
-	if(center) {
-		// center text
-		x0 = DISP_CENTER_X - (fwid * nb_chars)/2 - fwid/2;
-	}
-	disp_print(x0, y0, text_color, bg_color, transparent_bg, font, 0, text);
+void timer_app_draw(void) {
+	//disp_draw_line(DISP_CENTER_X, 0, DISP_CENTER_X, 240, DISP_COLOR_YELLOW); // center line for debug
+
+	//gui_text_box("Timer", 0, 30, 1, 5, TIMER_APP_GUI_COLOR, DISP_COLOR_BLACK, 0, &TIMER_APP_STR_FONT);
+	gui_text("Timer", 0, 30, 1, TIMER_APP_GUI_COLOR, DISP_COLOR_BLACK, 0, &TIMER_APP_STR_FONT);
+	gui_text("1", DISP_CENTER_X-3*16-16/2, 60, 0, TIMER_APP_GUI_COLOR, DISP_COLOR_BLACK, 0, &TIMER_APP_STR_FONT);
+	gui_draw_symbol(GUI_SYMBOL_STOP_SIZE_16x16, DISP_CENTER_X-3*16-16/2, 90, 0, TIMER_APP_GUI_COLOR, 0, 0);
+	gui_cursor(DISP_CENTER_X-3*16-16/2, 60, 16, 1*30+16, 4, TIMER_APP_GUI_COLOR);
+
+	gui_text("2", DISP_CENTER_X-1*16-16/2, 60, 0, TIMER_APP_GUI_COLOR, DISP_COLOR_BLACK, 0, &TIMER_APP_STR_FONT);
+	gui_draw_symbol(GUI_SYMBOL_PLAY_SIZE_16x16, DISP_CENTER_X-1*16-16/2, 90, 0, TIMER_APP_GUI_COLOR, 0, 0);
+	gui_cursor(DISP_CENTER_X-1*16-16/2, 60, 16, 1*30+16, 4, TIMER_APP_GUI_COLOR);
+
+	gui_text("3", DISP_CENTER_X+1*16-16/2, 60, 0, TIMER_APP_GUI_COLOR, DISP_COLOR_BLACK, 0, &TIMER_APP_STR_FONT);
+	gui_draw_symbol(GUI_SYMBOL_PAUSE_SIZE_16x16, DISP_CENTER_X+1*16-16/2, 90, 0, TIMER_APP_GUI_COLOR, 0, 0);
+	gui_cursor(DISP_CENTER_X+1*16-16/2, 60, 16, 1*30+16, 4, TIMER_APP_GUI_COLOR);
+
+	gui_text("4", DISP_CENTER_X+3*16-16/2, 60, 0, TIMER_APP_GUI_COLOR, DISP_COLOR_BLACK, 0, &TIMER_APP_STR_FONT);
+	gui_draw_symbol(GUI_SYMBOL_ALARM_SIZE_16x16, DISP_CENTER_X+3*16-16/2, 90, 0, TIMER_APP_GUI_COLOR, 0, 0);
+	gui_cursor(DISP_CENTER_X+3*16-16/2, 60, 16, 1*30+16, 4, TIMER_APP_GUI_COLOR);
+
+	// box around
+	gui_box(DISP_CENTER_X-3*16-16/2-4, 30, 7*16+8, 2*30+16+4, 4, TIMER_APP_GUI_COLOR);
+
+	disp_draw_circle(DISP_CENTER_X, DISP_CENTER_Y, 118, TIMER_APP_GUI_COLOR);
+
+	gui_text("00:00", 0,  120, 1, TIMER_APP_GUI_COLOR, DISP_COLOR_BLACK, 0, &TIMER_APP_STR_FONT);
+	gui_cursor(DISP_CENTER_X-2*16-16/2, 120, 2*16, 26, 4, DISP_COLOR_RED);
+	gui_cursor(DISP_CENTER_X+1*16-16/2, 120, 2*16, 26, 4, DISP_COLOR_GREEN);
+
+	gui_progress_bar(36, 20, 156, 180, 20, 1, TIMER_APP_GUI_COLOR);
+	gui_draw_symbol(GUI_SYMBOL_STOP_SIZE_32x32, 0, 190, 1, TIMER_APP_GUI_COLOR, 0, 0);
+	gui_cursor(DISP_CENTER_X-32/2, 190, 32, 32, 4, DISP_COLOR_YELLOW);
 }
 
-/**
- * draw a text box on the display
- * @param	text	to print
- * @param	x0		x position, left upper conrner
- * @param	y0		y position, left upper conrner
- * @param	center	=true: do center text, =false: use x0
- * @param	space	space between box and text
- * @param	text_color 	color of the text and the box
- * @param	bg_color
- * @param	transparent_bg	=false: do not use bg_colr
- */
-void gui_text_box(char *text, uint16_t x0, uint16_t y0, uint8_t center, uint16_t space, uint16_t text_color, uint16_t bg_color, uint8_t transparent_bg, FontDef_t *font) {
-	uint16_t fwid, fhi, nb_chars;
-	// some checks first
-	if((x0 > DISP_WIDTH) || (y0 > DISP_HEIGHT)){
-		// error, outside display
-		return;
-	}
-	if(text == NULL) {
-		// error, no text
-		return;
-	}
-	fwid = (uint16_t)font->FontWidth;
-	fhi  = (uint16_t)font->FontHeight;
-	nb_chars = (uint16_t)strlen(text)-1;
-	if(center) {
-		// center text
-		x0 = DISP_CENTER_X - (fwid * nb_chars)/2 - fwid/2;
-	}
-	disp_draw_round_rectangle(x0-space, y0-space, (fwid * (nb_chars+1))+2*space, fhi+2*space, space, text_color);
-	disp_print(x0, y0, text_color, bg_color, transparent_bg, font, 0, text);
-}
-
-/**
- * draw a progress bar
- * @param	progress	0 ... 100
- * @param	x0		x position, left upper conrner
- * @param	y0		y position, left upper conrner
- * @param	width
- * @param	heigth
- * @param	center	=true: do center text, =false: use x0
- * @param	color
- */
-void gui_progress_bar(uint16_t progress, uint16_t x0, uint16_t y0, uint16_t width, uint16_t height, uint8_t center, uint16_t color) {
-	uint16_t x1, space = 4;
-	if(center) {
-		x0 = DISP_CENTER_X - width/2;
-	}
-	if(progress > 100) {
-		progress = 100;
-	}
-	disp_draw_round_rectangle(x0-space, y0-space, width+2*space, height+2*space, 2*space, color);
-	x1 = x0 + width;
-	width = (width * progress)/100;
-	x0 = x1 - width; // right aligned
-	disp_draw_filled_round_rectangle(x0, y0, width, height, space, color);
-}
-
-void timer_app_draw_bg(void) {
+#if 0
+	// unused at the moment
 	/*
-	int16_t x0, y0, fwid, fhi, str_len;
-	fwid = TIMER_APP_STR_FONT.FontWidth;
-	fhi  = TIMER_APP_STR_FONT.FontHeight;
-	str_len = 5; // "Timer"
-	x0 = DISP_CENTER_X-(fwid*str_len+16)/2;
-	y0 = 30;
+	//gui_text("stop", 0, 160, 1, TIMER_APP_GUI_COLOR, DISP_COLOR_BLACK, 0, &TIMER_APP_STR_FONT);
 
-	disp_draw_round_rectangle(x0, y0, fwid*str_len+16, fhi+8, 4, DISP_COLOR_WHITE);
+	//gui_draw_symbol(symbol, x0, y0, center_x, color, bg_color, transparent_bg)
+	gui_draw_symbol(GUI_SYMBOL_STOP_SIZE_16x16, 1*64, 160, 0, TIMER_APP_GUI_COLOR, 0, 0);
+	gui_draw_symbol(GUI_SYMBOL_STOP_SIZE_32x32, 1*64+20, 160, 0, TIMER_APP_GUI_COLOR, 0, 0);
+	gui_draw_symbol(GUI_SYMBOL_PLAY_SIZE_16x16, 2*64, 160, 0, TIMER_APP_GUI_COLOR, 0, 0);
+	gui_draw_symbol(GUI_SYMBOL_PLAY_SIZE_32x32, 2*64+21, 160, 0, TIMER_APP_GUI_COLOR, 0, 0);
+
+	gui_draw_symbol(GUI_SYMBOL_PAUSE_SIZE_16x16, 1*64, 200, 0, TIMER_APP_GUI_COLOR, 0, 0);
+	gui_draw_symbol(GUI_SYMBOL_PAUSE_SIZE_32x32, 1*64+20, 200, 0, TIMER_APP_GUI_COLOR, 0, 0);
+	//gui_draw_symbol(GUI_SYMBOL_ALARM_SIZE_16x16, 2*64, 200, 0, TIMER_APP_GUI_COLOR, 0, 0);
+	//gui_draw_symbol(GUI_SYMBOL_ALARM_SIZE_32x32, 1*64+21, 195, 0, TIMER_APP_GUI_COLOR, 0, 0);
+
+
+	gui_draw_position_cross(40, 130, DISP_COLOR_RED);
+
+	gui_draw_position_cross(1*64, 160, DISP_COLOR_RED);
+	gui_draw_position_cross(1*64+20, 160, DISP_COLOR_RED);
+	gui_draw_position_cross(2*64, 160, DISP_COLOR_RED);
+	gui_draw_position_cross(2*64+20, 160, DISP_COLOR_RED);
+
+	gui_draw_position_cross(1*64, 200, DISP_COLOR_RED);
+	gui_draw_position_cross(1*64+16, 200+16, DISP_COLOR_RED);
+	gui_draw_position_cross(1*64+20, 200, DISP_COLOR_RED);
+	gui_draw_position_cross(1*64+20+32, 200+32, DISP_COLOR_RED);
+
+	gui_draw_position_cross(2*64, 200, DISP_COLOR_RED);
+	gui_draw_position_cross(2*64+20, 200, DISP_COLOR_RED);
 	*/
-	disp_draw_line(DISP_CENTER_X, 0, DISP_CENTER_X, 240, DISP_COLOR_YELLOW);
 
-	disp_draw_circle(DISP_CENTER_X, DISP_CENTER_Y, 118, DISP_COLOR_WHITE);
-	gui_text_box("Timer", 0, 30, 1, 5, DISP_COLOR_WHITE, DISP_COLOR_BLACK, 0, &TIMER_APP_STR_FONT);
-	gui_text("00:00", 0,  80, 1, DISP_COLOR_WHITE, DISP_COLOR_BLACK, 0, &TIMER_APP_STR_FONT);
-	gui_text("stop", 0, 160, 1, DISP_COLOR_WHITE, DISP_COLOR_BLACK, 0, &TIMER_APP_STR_FONT);
-
-	gui_progress_bar(73, 40, 130, 120, 20, 1, DISP_COLOR_WHITE);
 }
+#endif

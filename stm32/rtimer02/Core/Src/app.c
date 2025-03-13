@@ -36,7 +36,7 @@ void app_init(void) {
 	app_ev_task_handle = osThreadNew(app_event_task, NULL, &app_ev_task_attributes);
 
 	timer_app_init();
-	timer_app_draw_bg();
+	timer_app_draw();
 }
 
 int8_t app_event_task(void *argument) {
