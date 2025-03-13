@@ -11,29 +11,52 @@ void gui_element_set_redraw(gui_element_t *g) {
 	}
 }
 
+void gui_element_show_border(gui_element_t *g) {
+	if(g) {
+		g->flags |= GUI_ELEMENT_FLAG_REDRAW | GUI_ELEMENT_FLAG_SHOW_BORDER;
+	}
+}
+
+void gui_element_show_no_border(gui_element_t *g) {
+	if(g) {
+		g->flags &= ~GUI_ELEMENT_FLAG_SHOW_BORDER;
+		g->flags |=  GUI_ELEMENT_FLAG_REDRAW;
+	}
+}
+
 void gui_draw_element(gui_element_t *g) {
 	if(g == NULL) {
 		// error
 		return;
 	}
 	if((g->flags & GUI_ELEMENT_FLAG_REDRAW) == 0 ) {
-		// error
+		// nothing to do, skip
 		return;
 	}
 	g->flags &= ~GUI_ELEMENT_FLAG_REDRAW;
 
 	switch(g->type) {
 	case GUI_ELEMENT_TYPE_TEXT_LABEL:
-		gui_clear_area(g->x1, g->y1, g->x2, g->y2, g->bg_color);
+		gui_clear_area(g->x1, g->y1, g->size_x1, g->size_y1, g->bg_color);
 		gui_text(g->content.text.str, g->x0, g->y0, g->fg_color, g->bg_color, g->flags & GUI_ELEMENT_FLAG_TRANSPARENT_BG, g->content.text.font);
 		break;
+	case GUI_ELEMENT_TYPE_SYMBOL:
+		gui_clear_area(g->x1, g->y1, g->size_x1, g->size_y1, g->bg_color);
+		gui_draw_symbol(g->content.symbol, g->x0, g->y0, g->size_x, g->size_y, 0, g->fg_color, g->bg_color, g->flags & GUI_ELEMENT_FLAG_TRANSPARENT_BG);
+		if(g->flags & GUI_ELEMENT_FLAG_SHOW_BORDER) {
+			gui_cursor(g->x0, g->y0, g->size_x, g->size_y, g->border, g->fg_color);
+		}
+		break;
 	case GUI_ELEMENT_TYPE_TEXT_SYMBOL:
-		gui_clear_area(g->x1, g->y1, g->x2, g->y2, g->bg_color);
+		gui_clear_area(g->x1, g->y1, g->size_x1, g->size_y1, g->bg_color);
 		gui_text(g->content.text.str, g->x0, g->y0, g->fg_color, g->bg_color, g->flags & GUI_ELEMENT_FLAG_TRANSPARENT_BG, g->content.text.font);
-		//gui_draw_symbol(g->content.symbol, g->x0, g->y0, g->size_x, g->size_y, 0, g->fg_color, g->bg_color, g->flags & GUI_ELEMENT_FLAG_TRANSPARENT_BG);
-/*				if(timer_app_gui_ctrl.small_symbols[3].flags & 0x02) {
-					gui_cursor(DISP_CENTER_X+3*16+8, 50, 32, 16, 4, TIMER_APP_GUI_FG_COLOR);
-				}*/
+		uint16_t fwid = (uint16_t)(g->content.text.font->FontWidth);
+		uint16_t nb_chars = (uint16_t)strlen(g->content.text.str);
+		//gui_draw_symbol(g->content.symbol, g->x0+fwid*nb_chars+4, g->y0, g->size_x, g->size_y, 0, g->fg_color, g->bg_color, g->flags & GUI_ELEMENT_FLAG_TRANSPARENT_BG);
+		gui_draw_symbol(g->content.symbol, g->x0+fwid*nb_chars+4, g->y0, 16, 16, 0, g->fg_color, g->bg_color, g->flags & GUI_ELEMENT_FLAG_TRANSPARENT_BG);
+		if(g->flags & GUI_ELEMENT_FLAG_SHOW_BORDER) {
+			gui_cursor(g->x0, g->y0, g->size_x, g->size_y, g->border, g->fg_color);
+		}
 		break;
 	}
 }
@@ -101,8 +124,10 @@ void gui_element_init_text_label(gui_element_t *g, char *text, uint16_t x0, uint
 	g->border = 0;
 	g->x1 = g->x0-g->border;
 	g->y1 = g->y0-g->border;
-	g->x2 = g->x0+g->size_x+g->border;
-	g->y2 = g->y0+g->size_y+g->border;
+	g->size_x1 = g->size_x+2*g->border;
+	g->size_y1 = g->size_y+2*g->border;
+	//g->x2 = g->x0+g->size_x+g->border;
+	//g->y2 = g->y0+g->size_y+g->border;
 	g->content.text.font = font;
 }
 
@@ -166,9 +191,9 @@ void gui_draw_symbol(uint16_t symbol, uint16_t x0, uint16_t y0, uint16_t size_x,
 	switch(symbol) {
 	case GUI_SYMBOL_STOP:
 		if(center_x) {
-			x0 = DISP_CENTER_X - 16/2;
+			x0 = DISP_CENTER_X - size_x/2;
 		}
-		gui_draw_stop_symbol(x0, y0, 16, 16, 2, color);
+		gui_draw_stop_symbol(x0, y0, size_x, size_y, 2, color);
 		break;
 	case GUI_SYMBOL_PLAY:
 		if(center_x) {
@@ -178,9 +203,9 @@ void gui_draw_symbol(uint16_t symbol, uint16_t x0, uint16_t y0, uint16_t size_x,
 		break;
 	case GUI_SYMBOL_PAUSE:
 		if(center_x) {
-			x0 = DISP_CENTER_X - 16/2;
+			x0 = DISP_CENTER_X - size_x/2;
 		}
-		gui_draw_pause_symbol(x0, y0, 16, 16, 2, color);
+		gui_draw_pause_symbol(x0, y0, size_x, size_y, 2, color);
 		break;
 	case GUI_SYMBOL_ALARM:
 		if(center_x) {
@@ -207,18 +232,54 @@ void gui_element_init_small_text_symbol(gui_element_t *g, char *text, uint16_t s
 	strcpy(g->content.text.str, text); // deep copy
 	fwid = (uint16_t)font->FontWidth;
 	nb_chars = (uint16_t)strlen(text)-1;
-	g->size_x = (fwid * nb_chars) + fwid;
+	g->size_x = (fwid * nb_chars) + fwid+4+16+2;
 	g->size_y = (uint16_t)font->FontHeight;
 	g->content.text.flags = 0; // no center here
 	g->x0 = x0;
 	g->y0 = y0;
-	g->border = 0;
+	//default g->flags |= GUI_ELEMENT_FLAG_SHOW_BORDER;
+	g->border = 4;
 	g->x1 = g->x0-g->border;
 	g->y1 = g->y0-g->border;
-	g->x2 = g->x0+g->size_x+g->border;
-	g->y2 = g->y0+g->size_y+g->border;
+	g->size_x1 = g->size_x+2*g->border+2;
+	g->size_y1 = g->size_y+2*g->border+2;
+	//g->x2 = g->x0+g->size_x+g->border+2;
+	//g->y2 = g->y0+g->size_y+g->border+2;
 	g->content.text.font = font;
 	g->content.symbol = symbol;
+}
+
+void gui_element_init_large_symbol(gui_element_t *g, uint16_t symbol, uint16_t x0, uint16_t y0, uint16_t color, uint16_t bg_color, uint8_t transparent_bg) {
+	g->type = GUI_ELEMENT_TYPE_SYMBOL;
+	g->flags = 0; // clear all
+	g->x0 = x0;
+	g->y0 = y0;
+	g->size_x = 32; // large
+	g->size_y = 32;
+	g->fg_color = color;
+	g->bg_color = bg_color;
+	if(transparent_bg) {
+		g->flags |= GUI_ELEMENT_FLAG_TRANSPARENT_BG;
+	}
+	g->size_x = 32;
+	g->size_y = 32;
+	g->content.text.flags = 0; // no center here
+	g->x0 = x0;
+	g->y0 = y0;
+	//default g->flags |= GUI_ELEMENT_FLAG_SHOW_BORDER;
+	g->border = 4;
+	g->x1 = g->x0-g->border-2;
+	g->y1 = g->y0-g->border-2;
+	g->size_x1 = g->size_x+2*g->border+4;
+	g->size_y1 = g->size_y+2*g->border+4;
+	g->content.symbol = symbol;
+}
+
+void gui_element_set_symbol(gui_element_t *g, uint16_t symbol) {
+	if(g) {
+		g->flags |= GUI_ELEMENT_FLAG_REDRAW;
+		g->content.symbol = symbol;
+	}
 }
 
 void gui_box(uint16_t x0, uint16_t y0, uint16_t size_x, uint16_t size_y, uint16_t space, uint16_t color) {

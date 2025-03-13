@@ -98,19 +98,22 @@ void timer_app_init(void) {
 	timers[3].sec = 14;
 
 	// title
-	gui_element_init_text_label(&timer_app_gui_ctrl.g[TIMER_APP_GUI_TITLE], "Timer", 0, 20, 1, TIMER_APP_GUI_FG_COLOR, TIMER_APP_GUI_BG_COLOR, 0, &Font_16x26);
+	gui_element_init_text_label(&timer_app_gui_ctrl.g[TIMER_APP_GUI_TITLE], "Timer", 0, 18, 1, TIMER_APP_GUI_FG_COLOR, TIMER_APP_GUI_BG_COLOR, 0, &Font_16x26);
 	gui_element_set_redraw(&timer_app_gui_ctrl.g[TIMER_APP_GUI_TITLE]);
-	gui_element_init_small_text_symbol(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SMALL_SYMBOL0], "1", GUI_SYMBOL_STOP, DISP_CENTER_X-6*16, 50, TIMER_APP_GUI_FG_COLOR, TIMER_APP_GUI_BG_COLOR, 0, &Font_11x18);
-	gui_element_set_redraw(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SMALL_SYMBOL0]);
-	gui_element_init_small_text_symbol(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SMALL_SYMBOL1], "2", GUI_SYMBOL_STOP, DISP_CENTER_X-3*16, 50, TIMER_APP_GUI_FG_COLOR, TIMER_APP_GUI_BG_COLOR, 0, &Font_11x18);
+	gui_element_init_small_text_symbol(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SMALL_SYMBOL0], "1", GUI_SYMBOL_STOP, DISP_CENTER_X-6*16+8, 50, TIMER_APP_GUI_FG_COLOR, TIMER_APP_GUI_BG_COLOR, 0, &Font_11x18);
+	gui_element_show_border(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SMALL_SYMBOL0]);
+	gui_element_init_small_text_symbol(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SMALL_SYMBOL1], "2", GUI_SYMBOL_STOP, DISP_CENTER_X-3*16+8, 50, TIMER_APP_GUI_FG_COLOR, TIMER_APP_GUI_BG_COLOR, 0, &Font_11x18);
 	gui_element_set_redraw(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SMALL_SYMBOL1]);
-	gui_element_init_small_text_symbol(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SMALL_SYMBOL2], "3", GUI_SYMBOL_PAUSE, DISP_CENTER_X-0*16, 50, TIMER_APP_GUI_FG_COLOR, TIMER_APP_GUI_BG_COLOR, 0, &Font_11x18);
+	gui_element_init_small_text_symbol(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SMALL_SYMBOL2], "3", GUI_SYMBOL_PAUSE, DISP_CENTER_X+0*16+8, 50, TIMER_APP_GUI_FG_COLOR, TIMER_APP_GUI_BG_COLOR, 0, &Font_11x18);
 	gui_element_set_redraw(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SMALL_SYMBOL2]);
-	gui_element_init_small_text_symbol(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SMALL_SYMBOL3], "4", GUI_SYMBOL_PAUSE, DISP_CENTER_X-3*16, 50, TIMER_APP_GUI_FG_COLOR, TIMER_APP_GUI_BG_COLOR, 0, &Font_11x18);
+	gui_element_init_small_text_symbol(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SMALL_SYMBOL3], "4", GUI_SYMBOL_PAUSE, DISP_CENTER_X+3*16+8, 50, TIMER_APP_GUI_FG_COLOR, TIMER_APP_GUI_BG_COLOR, 0, &Font_11x18);
 	gui_element_set_redraw(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SMALL_SYMBOL3]);
 
+	gui_element_init_large_symbol(&timer_app_gui_ctrl.g[TIMER_APP_GUI_LARGE_SYMBOL], GUI_SYMBOL_STOP, DISP_CENTER_X-32/2, 190, TIMER_APP_GUI_FG_COLOR, TIMER_APP_GUI_BG_COLOR, 0);
+	gui_element_set_redraw(&timer_app_gui_ctrl.g[TIMER_APP_GUI_LARGE_SYMBOL]);
+
 	timer_app_tim_handle = osTimerNew(timer_app_tim_func, osTimerPeriodic, NULL, &timer_app_tim_attributes);
-	//osTimerStart(timer_app_tim_handle, 1000/portTICK_PERIOD_MS);
+	osTimerStart(timer_app_tim_handle, 1000/portTICK_PERIOD_MS);
 }
 
 static inline void timer_app_draw_state_small_symbol(uint16_t state, uint16_t x0, uint16_t y0, uint16_t color) {
@@ -251,6 +254,7 @@ void timer_app_draw_old(void) {
 }
 
 void timer_app_draw(void) {
+	disp_draw_line(DISP_CENTER_X, 0, DISP_CENTER_X, 240, DISP_COLOR_YELLOW); // center line for debug
 	uint16_t n;
 	for(n = 0; n < TIMER_APP_NB_GUI_ELEMENTS; n++) {
 		gui_draw_element(&timer_app_gui_ctrl.g[n]);
@@ -270,5 +274,31 @@ void timer_app_tim_func(void *argument) {
 	timer_app_gui_ctrl.progress.flags = 0x01;
 	timer_app_gui_ctrl.large_symbol.flags = 0x01;
 
+	switch(timer_app_gui_ctrl.current_timer) {
+	case 0:
+		gui_element_show_no_border(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SMALL_SYMBOL3]);
+		gui_element_show_border(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SMALL_SYMBOL0]);
+		gui_element_set_symbol(&timer_app_gui_ctrl.g[TIMER_APP_GUI_LARGE_SYMBOL], GUI_SYMBOL_STOP);
+		gui_element_show_no_border(&timer_app_gui_ctrl.g[TIMER_APP_GUI_LARGE_SYMBOL]);
+		break;
+	case 1:
+		gui_element_show_no_border(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SMALL_SYMBOL0]);
+		gui_element_show_border(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SMALL_SYMBOL1]);
+		gui_element_set_symbol(&timer_app_gui_ctrl.g[TIMER_APP_GUI_LARGE_SYMBOL], GUI_SYMBOL_PAUSE);
+		gui_element_show_border(&timer_app_gui_ctrl.g[TIMER_APP_GUI_LARGE_SYMBOL]);
+		break;
+	case 2:
+		gui_element_show_no_border(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SMALL_SYMBOL1]);
+		gui_element_show_border(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SMALL_SYMBOL2]);
+		gui_element_set_symbol(&timer_app_gui_ctrl.g[TIMER_APP_GUI_LARGE_SYMBOL], GUI_SYMBOL_ALARM);
+		gui_element_show_no_border(&timer_app_gui_ctrl.g[TIMER_APP_GUI_LARGE_SYMBOL]);
+		break;
+	case 3:
+		gui_element_show_no_border(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SMALL_SYMBOL2]);
+		gui_element_show_border(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SMALL_SYMBOL3]);
+		gui_element_set_symbol(&timer_app_gui_ctrl.g[TIMER_APP_GUI_LARGE_SYMBOL], GUI_SYMBOL_PLAY);
+		gui_element_show_border(&timer_app_gui_ctrl.g[TIMER_APP_GUI_LARGE_SYMBOL]);
+		break;
+	}
 	timer_app_draw();
 }

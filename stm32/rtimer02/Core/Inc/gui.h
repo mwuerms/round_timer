@@ -22,7 +22,8 @@ typedef struct {
 	uint16_t x0, y0; // origin (x,y) position, left upper corner
 	uint16_t size_x, size_y; // size of the gui element
 	uint16_t border; // space around the gui element
-	uint16_t x1, y1, x2, y2; // total positions (x1,y1) = (x0-border,y0-border), (x2,y2) = (x0+size_x+border,y0+size_y+border)
+	uint16_t x1, y1; // positions to clear from (x1,y1) = (x0-border,y0-border)
+	uint16_t size_x1, size_y1; // size to clear
 	uint16_t fg_color, bg_color; // colors of fore ground and back ground
 	struct {
 		// element specific content, see type, static for now
@@ -54,6 +55,8 @@ typedef struct {
 // - public functions ----------------------------------------------------------
 
 void gui_element_set_redraw(gui_element_t *g);
+void gui_element_show_border(gui_element_t *g);
+void gui_element_show_no_border(gui_element_t *g);
 void gui_draw_element(gui_element_t *g);
 #define gui_clear_area(x0, y0, size_x, size_y, color) disp_fill_rectangle(x0, y0, size_x, size_y, color)
 #define gui_clear() disp_clear()
@@ -133,7 +136,8 @@ void gui_progress_bar(uint16_t progress, uint16_t x0, uint16_t y0, uint16_t size
 
 void gui_draw_symbol(uint16_t symbol, uint16_t x0, uint16_t y0, uint16_t size_x, uint16_t size_y, uint8_t center_x, uint16_t color, uint16_t bg_color, uint8_t transparent_bg);
 void gui_element_init_small_text_symbol(gui_element_t *g, char *text, uint16_t symbol, uint16_t x0, uint16_t y0, uint16_t color, uint16_t bg_color, uint8_t transparent_bg, FontDef_t *font);
-void gui_element_init_large_text_symbol(gui_element_t *g, char *text, uint16_t symbol, uint16_t x0, uint16_t y0, uint16_t color, uint16_t bg_color, uint8_t transparent_bg, FontDef_t *font);
+void gui_element_init_large_symbol(gui_element_t *g, uint16_t symbol, uint16_t x0, uint16_t y0, uint16_t color, uint16_t bg_color, uint8_t transparent_bg);
+void gui_element_set_symbol(gui_element_t *g, uint16_t symbol);
 
 /**
  * draw a cursor using rounded box
