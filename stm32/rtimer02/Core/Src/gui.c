@@ -40,6 +40,10 @@ void gui_draw_element(gui_element_t *g) {
 		gui_clear_area(g->x1, g->y1, g->size_x1, g->size_y1, g->bg_color);
 		gui_text(g->content.text.str, g->x0, g->y0, g->fg_color, g->bg_color, g->flags & GUI_ELEMENT_FLAG_TRANSPARENT_BG, g->content.text.font);
 		break;
+	case GUI_ELEMENT_TYPE_PROGRESS_BAR:
+		gui_clear_area(g->x1, g->y1, g->size_x1, g->size_y1, g->bg_color);
+		gui_progress_bar(g->content.progress, g->x0, g->y0, g->size_x, g->size_y, g->border, g->fg_color);
+		break;
 	case GUI_ELEMENT_TYPE_SYMBOL:
 		gui_clear_area(g->x1, g->y1, g->size_x1, g->size_y1, g->bg_color);
 		gui_draw_symbol(g->content.symbol, g->x0, g->y0, g->size_x, g->size_y, 0, g->fg_color, g->bg_color, g->flags & GUI_ELEMENT_FLAG_TRANSPARENT_BG);
@@ -153,19 +157,45 @@ void gui_text_box(char *text, uint16_t x0, uint16_t y0, uint8_t center_x, uint16
 	disp_print(x0, y0, text_color, bg_color, transparent_bg, font, 0, text);
 }
 
-void gui_progress_bar(uint16_t progress, uint16_t x0, uint16_t y0, uint16_t size_x, uint16_t size_y, uint8_t center_x, uint16_t color) {
-	uint16_t x1, space = 4;
-	if(center_x) {
-		x0 = DISP_CENTER_X - size_x/2;
-	}
+void gui_progress_bar(uint16_t progress, uint16_t x0, uint16_t y0, uint16_t size_x, uint16_t size_y, uint16_t space, uint16_t color) {
+	uint16_t x1;
 	if(progress > 100) {
 		progress = 100;
 	}
+	// border
 	disp_draw_round_rectangle(x0-space, y0-space, size_x+2*space, size_y+2*space, 2*space, color);
 	x1 = x0 + size_x;
 	size_x = (size_x * progress)/100;
 	x0 = x1 - size_x; // right aligned
 	disp_draw_filled_round_rectangle(x0, y0, size_x, size_y, space, color);
+}
+
+void gui_element_init_progress_bar(gui_element_t *g, uint16_t x0, uint16_t y0, uint16_t size_x, uint16_t size_y, uint16_t color, uint16_t bg_color, uint8_t transparent_bg) {
+	g->type = GUI_ELEMENT_TYPE_PROGRESS_BAR;
+	g->flags = 0; // clear all
+	g->x0 = x0;
+	g->y0 = y0;
+	g->size_x = size_x;
+	g->size_y = size_y;
+	g->fg_color = color;
+	g->bg_color = bg_color;
+	if(transparent_bg) {
+		g->flags |= GUI_ELEMENT_FLAG_TRANSPARENT_BG;
+	}
+	g->flags |= GUI_ELEMENT_FLAG_SHOW_BORDER;
+	g->border = 4;
+	g->x1 = g->x0-g->border;
+	g->y1 = g->y0-g->border;
+	g->size_x1 = g->size_x+2*g->border+2;
+	g->size_y1 = g->size_y+2*g->border+2;
+	g->content.progress = 0;
+}
+
+void gui_element_set_progress(gui_element_t *g, uint16_t progress) {
+	if(g) {
+		g->flags |= GUI_ELEMENT_FLAG_REDRAW | GUI_ELEMENT_FLAG_SHOW_BORDER;
+		g->content.progress = progress;
+	}
 }
 
 // GUI_SYMBOL_STOP_SIZE_16x16 (0)

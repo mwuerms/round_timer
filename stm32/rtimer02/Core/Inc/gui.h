@@ -33,6 +33,7 @@ typedef struct {
 			uint16_t flags;
 		} text;
 		uint16_t symbol;
+		uint16_t progress; // progress bar, 0 ... 100 -> 0% ... 100 %
 	} content;
 } gui_element_t;
 
@@ -41,8 +42,8 @@ typedef struct {
 #define GUI_ELEMENT_TYPE_TEXT_LABEL (100) // plain text, no border
 #define GUI_ELEMENT_TYPE_TEXT_BOX (101) // text with border (round box)
 #define GUI_ELEMENT_TYPE_PROGRESS_BAR (200) // a progress bar
-#define GUI_ELEMENT_TYPE_SYMBOL (200) // only a symbol, may have a border (round box)
-#define GUI_ELEMENT_TYPE_TEXT_SYMBOL (201) // only a symbol, may have a border (round box)
+#define GUI_ELEMENT_TYPE_SYMBOL (201) // only a symbol, may have a border (round box)
+#define GUI_ELEMENT_TYPE_TEXT_SYMBOL (202) // only a symbol, may have a border (round box)
 
 #define BITn(n) (1 << n)
 
@@ -104,10 +105,12 @@ void gui_text_box(char *text, uint16_t x0, uint16_t y0, uint8_t center_x, uint16
  * @param	y0		y position, left upper conrner
  * @param	size_x  width
  * @param	size_y  heigth
- * @param	center_x	=true: do center text, =false: use x0
+ * @param	space	space between box and text, also corner radius
  * @param	color
  */
-void gui_progress_bar(uint16_t progress, uint16_t x0, uint16_t y0, uint16_t size_x, uint16_t size_y, uint8_t center_x, uint16_t color);
+void gui_progress_bar(uint16_t progress, uint16_t x0, uint16_t y0, uint16_t size_x, uint16_t size_y, uint16_t space, uint16_t color);
+void gui_element_init_progress_bar(gui_element_t *g, uint16_t x0, uint16_t y0, uint16_t size_x, uint16_t size_y, uint16_t color, uint16_t bg_color, uint8_t transparent_bg);
+void gui_element_set_progress(gui_element_t *g, uint16_t progress);
 
 /**
  * draw a symbol
