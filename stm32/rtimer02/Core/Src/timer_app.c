@@ -14,7 +14,7 @@
 #define TIMER_APP_GUI_BG_COLOR DISP_COLOR_BLACK
 
 #define TIMER_APP_NB_TIMERS (4)
-#define TIMER_APP_NB_GUI_ELEMENTS (8)
+#define TIMER_APP_NB_GUI_ELEMENTS (10)
 static struct {
     uint8_t current_timer;
     uint8_t cursor_pos;
@@ -53,6 +53,8 @@ static struct {
 #define TIMER_APP_GUI_TIME (5)
 #define TIMER_APP_GUI_PROG_BAR (6)
 #define TIMER_APP_GUI_LARGE_SYMBOL (7)
+#define TIMER_APP_GUI_SIDE_CURSOR_LEFT (8)
+#define TIMER_APP_GUI_SIDE_CURSOR_RIGHT (9)
 
 typedef struct {
 	uint16_t state;
@@ -113,8 +115,16 @@ void timer_app_init(void) {
 	gui_element_init_progress_bar(&timer_app_gui_ctrl.g[TIMER_APP_GUI_PROG_BAR], DISP_CENTER_X-180/2, 156, 180, 20, TIMER_APP_GUI_FG_COLOR, TIMER_APP_GUI_BG_COLOR, 0);
 	gui_element_set_redraw(&timer_app_gui_ctrl.g[TIMER_APP_GUI_PROG_BAR]);
 
-	gui_element_init_large_symbol(&timer_app_gui_ctrl.g[TIMER_APP_GUI_LARGE_SYMBOL], GUI_SYMBOL_STOP, DISP_CENTER_X-32/2, 190, TIMER_APP_GUI_FG_COLOR, TIMER_APP_GUI_BG_COLOR, 0);
+	gui_element_init_large_symbol(&timer_app_gui_ctrl.g[TIMER_APP_GUI_LARGE_SYMBOL], GUI_SYMBOL_STOP, DISP_CENTER_X-32/2, 196, TIMER_APP_GUI_FG_COLOR, TIMER_APP_GUI_BG_COLOR, 0);
 	gui_element_set_redraw(&timer_app_gui_ctrl.g[TIMER_APP_GUI_LARGE_SYMBOL]);
+
+	gui_element_init_large_symbol(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SIDE_CURSOR_LEFT], GUI_SYMBOL_STOP, DISP_CENTER_X-32/2, 196, TIMER_APP_GUI_FG_COLOR, TIMER_APP_GUI_BG_COLOR, 0);
+	gui_element_set_redraw(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SIDE_CURSOR_LEFT]);
+	//gui_element_init_side_cursor(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SIDE_CURSOR_RIGHT], 1, DISP_CENTER_X-);
+	//gui_element_set_redraw(&timer_app_gui_ctrl.g[TIMER_APP_GUI_SIDE_CURSOR_RIGHT]);
+
+	gui_side_cursor(0,  2,  10, 96, 20, 32, TIMER_APP_GUI_FG_COLOR);
+	gui_side_cursor(1,  2, 210, 96, 20, 32, TIMER_APP_GUI_FG_COLOR);
 
 	timer_app_tim_handle = osTimerNew(timer_app_tim_func, osTimerPeriodic, NULL, &timer_app_tim_attributes);
 	osTimerStart(timer_app_tim_handle, 1000/portTICK_PERIOD_MS);

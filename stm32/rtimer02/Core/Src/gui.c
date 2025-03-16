@@ -315,3 +315,65 @@ void gui_element_set_symbol(gui_element_t *g, uint16_t symbol) {
 void gui_box(uint16_t x0, uint16_t y0, uint16_t size_x, uint16_t size_y, uint16_t space, uint16_t color) {
 	disp_draw_round_rectangle(x0-space, y0-space, size_x+2*space, size_y+2*space, space, color);
 }
+
+void gui_side_cursor(uint16_t side, uint16_t state, uint16_t x0, uint16_t y0, uint16_t size_x, uint16_t size_y, uint16_t color) {
+	uint16_t x1, y1, x2, y2, thick;
+	if(state == 0) {
+		// nothing to draw, skip
+		return;
+	}
+	thick = 1; // normally: small line
+	if(state == 2) {
+		thick = 3;
+	}
+	if(side == 0) {
+		// left side
+		x0 = x0;
+		x1 = x0 + size_x;
+		x2 = x1;
+		y1 = y0;
+		y0 = y0 + size_y/2;
+		y2 = y0 + size_y/2;
+	}
+	else {
+		// right side
+		x1 = x0;
+		x2 = x1;
+		x0 = x0 + size_x;
+		y1 = y0;
+		y0 = y0 + size_y/2;
+		y2 = y0 + size_y/2;
+	}
+	disp_draw_thick_line(x0, y0, x1, y1, color, thick);
+	disp_draw_thick_line(x0, y0, x2, y2, color, thick);
+}
+
+/*
+void gui_element_init_progress_bar(gui_element_t *g, uint16_t x0, uint16_t y0, uint16_t size_x, uint16_t size_y, uint16_t color, uint16_t bg_color, uint8_t transparent_bg) {
+	g->type = GUI_ELEMENT_TYPE_PROGRESS_BAR;
+	g->flags = 0; // clear all
+	g->x0 = x0;
+	g->y0 = y0;
+	g->size_x = size_x;
+	g->size_y = size_y;
+	g->fg_color = color;
+	g->bg_color = bg_color;
+	if(transparent_bg) {
+		g->flags |= GUI_ELEMENT_FLAG_TRANSPARENT_BG;
+	}
+	g->flags |= GUI_ELEMENT_FLAG_SHOW_BORDER;
+	g->border = 4;
+	g->x1 = g->x0-g->border;
+	g->y1 = g->y0-g->border;
+	g->size_x1 = g->size_x+2*g->border+2;
+	g->size_y1 = g->size_y+2*g->border+2;
+	g->content.progress = 0;
+}
+
+void gui_element_set_progress(gui_element_t *g, uint16_t progress) {
+	if(g) {
+		g->flags |= GUI_ELEMENT_FLAG_REDRAW | GUI_ELEMENT_FLAG_SHOW_BORDER;
+		g->content.progress = progress;
+	}
+}
+*/
